@@ -1,5 +1,7 @@
 # Extra Trees – zufällige Schwellen statt Split-Suche – Streamlit-Demo
 
+**[→ Demo live ausprobieren](https://sebastianhanisch-extra-trees-demo.streamlit.app/)**
+
 Viertes und letztes Stück des **Bagging-Asts** der Baumbasierten Linie der "Konzepte"-Reihe für die Website "Sebastian Hanisch – Operations Research und Machine Learning", Nachfolger von [Random Forest](../random-forest-demo):
 anders als die Fall-Demos im Portfolio (ein Anwendungsfall, mehrere Verfahren im Vergleich) zeigt diese Demo **ein** Verfahren – **Extra Trees** (Geurts, Ernst, Wehenkel 2006) – an einem wachsenden Beispiel.
 Vehikel: dieselben **Lieferungen** wie in cart-demo/bagging-demo/random-forest-demo. Der Baumkern ist aus cart-demo/random-forest-demo übernommen und um die Zufallsschwelle erweitert (`et_tree.py`); die Bootstrap-/Mittel-Logik ist wortgleich zu random-forest-demo, nur um einen Bootstrap-Regler ergänzt.
