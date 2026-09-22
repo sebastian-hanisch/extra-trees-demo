@@ -1,4 +1,4 @@
-# Extra Trees – zufällige Schwellen statt Schnittsuche – Streamlit-Demo
+# Extra Trees – zufällige Schwellen statt Split-Suche – Streamlit-Demo
 
 Viertes und letztes Stück des **Bagging-Asts** der Baumbasierten Linie der "Konzepte"-Reihe für die Website "Sebastian Hanisch – Operations Research und Machine Learning", Nachfolger von [Random Forest](../random-forest-demo):
 anders als die Fall-Demos im Portfolio (ein Anwendungsfall, mehrere Verfahren im Vergleich) zeigt diese Demo **ein** Verfahren – **Extra Trees** (Geurts, Ernst, Wehenkel 2006) – an einem wachsenden Beispiel.
@@ -7,7 +7,7 @@ Alle Daten sind erzeugt, alle Zahlen gemessen und in `tests/test_claims.py` fest
 
 **Bezug zu OR:** viel weniger Rechenaufwand je Baum heißt, dass sich bei knapper Rechenzeit (etwa in einer Schleife der Tourenplanung, die viele Vorhersagen pro Sekunde braucht) ein größerer Wald oder häufigeres Neu-Trainieren ausgeht – eine Abwägung zwischen Modellgüte und Rechenbudget, nicht nur zwischen Modellen.
 
-**Einordnung in die Reihe:** Random Forest sucht an jedem Schnitt noch die **beste** Schwelle unter den mtry Kandidatenmerkmalen. Extra Trees geht einen Schritt weiter: **eine** zufällige Schwelle je Kandidat, keine Suche. Das ist mehr Bias (schlechtere Einzelschnitte), aber weniger Varianz (unkorreliertere Bäume) – und vor allem ein Bruchteil des Rechenaufwands. Damit ist der Bagging-Ast der Linie abgeschlossen; der Boosting-Ast (AdaBoost → Gradient Boosting → XGBoost/LightGBM/CatBoost) folgt als nächstes.
+**Einordnung in die Reihe:** Random Forest sucht an jedem Split noch die **beste** Schwelle unter den mtry Kandidatenmerkmalen. Extra Trees geht einen Schritt weiter: **eine** zufällige Schwelle je Kandidat, keine Suche. Das ist mehr Bias (schlechtere Einzel-Splits), aber weniger Varianz (unkorreliertere Bäume) – und vor allem ein Bruchteil des Rechenaufwands. Damit ist der Bagging-Ast der Linie abgeschlossen; der Boosting-Ast (AdaBoost → Gradient Boosting → XGBoost/LightGBM/CatBoost) folgt als nächstes.
 
 ```
 CART → Bagging → Random Forest → Extra Trees (dieses Stück, letztes des Bagging-Asts)
@@ -45,7 +45,7 @@ CART → Bagging → Random Forest → Extra Trees (dieses Stück, letztes des B
 
 ## Verifikation
 
-`tests/test_algorithm.py` (18 Tests): Zufallsschwellen liegen immer im Wertebereich der Knotenzeilen, Mindestblattgröße wird eingehalten; **der Aufwands-Zähler stimmt exakt mit einer direkten Instrumentierung der Schnittsuche überein** und ist 20-fach kleiner als die erschöpfende Alternative auf dem Standarddatensatz; `extra=False` reproduziert den unveränderten Kern aus cart-demo/random-forest-demo bitgenau; Kreuzprobe gegen `ExtraTreesClassifier`/`ExtraTreesRegressor` über ein Fehlerband; ohne Bootstrap sieht jeder Baum jede Zeile und Out-of-Bag ist leer, mit Bootstrap verhält es sich wie in bagging-demo (≈ 63,2 % einzigartige Zeilen); Grenzfälle (im Knoten konstantes Kandidatenmerkmal, ein einzelner Baum).
+`tests/test_algorithm.py` (18 Tests): Zufallsschwellen liegen immer im Wertebereich der Knotenzeilen, Mindestblattgröße wird eingehalten; **der Aufwands-Zähler stimmt exakt mit einer direkten Instrumentierung der Split-Suche überein** und ist 20-fach kleiner als die erschöpfende Alternative auf dem Standarddatensatz; `extra=False` reproduziert den unveränderten Kern aus cart-demo/random-forest-demo bitgenau; Kreuzprobe gegen `ExtraTreesClassifier`/`ExtraTreesRegressor` über ein Fehlerband; ohne Bootstrap sieht jeder Baum jede Zeile und Out-of-Bag ist leer, mit Bootstrap verhält es sich wie in bagging-demo (≈ 63,2 % einzigartige Zeilen); Grenzfälle (im Knoten konstantes Kandidatenmerkmal, ein einzelner Baum).
 `tests/test_claims.py` hält **jede Zahl** aus App und README fest. `tests/test_app.py` prüft die Oberfläche per AppTest (jedes Preset, Aufgabenwechsel, Bootstrap-Regler ohne toten Metrik-Platz, mtry-Grenzen bei wechselnder Merkmalszahl, Abspielen mit mehreren Bildern und schrittspezifischen Diagramm-Schlüsseln, Permalink, Experimente).
 
 ## Dateistruktur

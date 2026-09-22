@@ -64,7 +64,7 @@ def build_tree(tree, task, y_range, height=280):
     fig.add_trace(go.Scatter(x=x[~inner], y=y[~inner], mode="markers", marker=dict(size=size[~inner], color=color[~inner], colorscale=_scale(task), cmin=vmin, cmax=vmax, line=dict(color="#111111", width=1)),
                              hovertext=[f"Blatt: {value_text(task, tree.value[t])}, n={tree.n[t]}" for t in np.nonzero(~inner)[0]], hoverinfo="text", showlegend=False))
     fig.add_trace(go.Scatter(x=x[inner], y=y[inner], mode="markers", marker=dict(size=size[inner], color="#ffffff", line=dict(color="#555555", width=1)),
-                             hovertext=[f"Schnitt {tree.feature[t]}" for t in np.nonzero(inner)[0]], hoverinfo="text", showlegend=False))
+                             hovertext=[f"Split {tree.feature[t]}" for t in np.nonzero(inner)[0]], hoverinfo="text", showlegend=False))
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
     return lock_axes(fig, height, plot_bgcolor="rgba(0,0,0,0)")

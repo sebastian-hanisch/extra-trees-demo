@@ -1,4 +1,4 @@
-"""Extra Trees: wie Random Forest (random-forest-demo) B Bäume mit `mtry` zufälligen Merkmalen je Schnitt, aber jeder Schnitt zieht pro Kandidatenmerkmal nur EINE zufällige Schwelle statt sie zu suchen
+"""Extra Trees: wie Random Forest (random-forest-demo) B Bäume mit `mtry` zufälligen Merkmalen je Split, aber jeder Split zieht pro Kandidatenmerkmal nur EINE zufällige Schwelle statt sie zu suchen
 (Geurts, Ernst, Wehenkel 2006). Standardmäßig zusätzlich OHNE Bootstrap (jeder Baum sieht alle Trainingszeilen; die Zufallsschwellen allein sorgen für unterschiedliche Bäume) - Bootstrap ist ein Regler.
 Der Baumkern (mit `mtry` UND `extra`) steht in `et_tree.py`."""
 

@@ -1,8 +1,8 @@
-"""Extra Trees - zufällige Schwellen statt Schnittsuche - interaktive Konzept-Demo
+"""Extra Trees - zufällige Schwellen statt Split-Suche - interaktive Konzept-Demo
 Sebastian Hanisch - Operations Research und Machine Learning
 
 Anders als die Fall-Demos im Portfolio (ein Anwendungsfall, mehrere Verfahren im Vergleich) zeigt diese Demo EIN Verfahren - Extra Trees - und lässt stattdessen das Beispiel wachsen.
-Viertes und letztes Stück des Bagging-Asts der Baumbasierten Linie der "Konzepte"-Reihe: der Nachfolger von Random Forest (random-forest-demo). Random Forest sucht an jedem Schnitt noch die
+Viertes und letztes Stück des Bagging-Asts der Baumbasierten Linie der "Konzepte"-Reihe: der Nachfolger von Random Forest (random-forest-demo). Random Forest sucht an jedem Split noch die
 BESTE Schwelle unter den mtry Kandidatenmerkmalen; Extra Trees zieht pro Kandidat nur EINE zufällige Schwelle - mehr Bias, weniger Varianz, ein Bruchteil des Rechenaufwands.
 Siehe README für die Einordnung.
 
@@ -67,12 +67,12 @@ def _bias_variance(task, criterion, leaf, n_trees, mtry, n, n_noise):
     return ev.bias_variance_rows(task, criterion, leaf, n_trees, mtry, n, n_noise)
 
 
-st.title("🌳🎰 Extra Trees – zufällige Schwellen statt Schnittsuche")
+st.title("🌳🎰 Extra Trees – zufällige Schwellen statt Split-Suche")
 st.markdown(
     """
-Random Forest (random-forest-demo) entkoppelt Bäume, indem jeder Schnitt nur eine zufällige Teilmenge von **mtry** Merkmalen zur Wahl hat - **unter diesen** sucht er aber weiterhin die **beste** Schwelle,
+Random Forest (random-forest-demo) entkoppelt Bäume, indem jeder Split nur eine zufällige Teilmenge von **mtry** Merkmalen zur Wahl hat - **unter diesen** sucht er aber weiterhin die **beste** Schwelle,
 über alle Werte im Knoten. **Extra Trees** (*Extremely Randomized Trees*, Geurts, Ernst, Wehenkel 2006) geht einen Schritt weiter: für jedes Kandidatenmerkmal wird **nur eine** Schwelle zufällig gezogen
-(gleichverteilt zwischen dem kleinsten und größten Wert im Knoten) - keine Suche, nur ein Wurf. Das macht jeden Schnitt schlechter (**mehr Bias**), aber die Bäume unterscheiden sich noch stärker
+(gleichverteilt zwischen dem kleinsten und größten Wert im Knoten) - keine Suche, nur ein Wurf. Das macht jeden Split schlechter (**mehr Bias**), aber die Bäume unterscheiden sich noch stärker
 (**weniger Varianz**) - und vor allem: **massiv weniger Rechenaufwand** (ein geprüftes Paar statt bis zu tausenden Schwellen je Merkmal). Standardmäßig verzichtet Extra Trees zusätzlich auf Bootstrap-Stichproben -
 jeder Baum sieht alle Trainingszeilen, die Zufallsschwellen allein sorgen für Vielfalt.
 """
@@ -89,7 +89,7 @@ with st.expander("So funktioniert Extra Trees", expanded=True):
     st.markdown(
         """
 1. **Wie Random Forest:** an jedem Knoten wird zuerst eine zufällige Teilmenge von **mtry** der d Merkmale gezogen.
-2. **Der Unterschied:** für jedes dieser mtry Merkmale wird **eine einzige** Schwelle zufällig gezogen (gleichverteilt zwischen Minimum und Maximum dieses Merkmals im Knoten) - keine Suche über alle Werte. Der beste der mtry Zufallsschnitte gewinnt.
+2. **Der Unterschied:** für jedes dieser mtry Merkmale wird **eine einzige** Schwelle zufällig gezogen (gleichverteilt zwischen Minimum und Maximum dieses Merkmals im Knoten) - keine Suche über alle Werte. Der beste der mtry Zufalls-Splits gewinnt.
 3. **Aufwand:** ein Knoten mit m Zeilen braucht bei erschöpfender Suche bis zu mtry × (m − 1) geprüfte Schwellen; Extra Trees braucht immer nur **mtry** - unabhängig von m.
 4. **Kein Bootstrap (Standard):** jeder Baum sieht alle n Trainingszeilen; die Zufallsschwellen (und bei mtry < d die Merkmalsauswahl) reichen für unterschiedliche Bäume. Bootstrap ist ein Regler - zusammen ergibt das eine zweite, unabhängige Quelle der Vielfalt (und Out-of-Bag).
         """
@@ -112,11 +112,11 @@ with st.sidebar:
     st.header("⚙️ Einstellungen")
     task = st.selectbox("Aufgabe", C.TASKS, key="task_select", format_func=lambda k: C.TASK_LABELS[k])
     if task == "class":
-        crit = st.selectbox("Schnittkriterium", C.CRITERIA["class"], key="criterion_select", format_func=lambda k: C.CRITERION_LABELS[k])
+        crit = st.selectbox("Split-Kriterium", C.CRITERIA["class"], key="criterion_select", format_func=lambda k: C.CRITERION_LABELS[k])
         st.session_state[KEPT["criterion_select"]] = crit
     else:
         crit = "variance"
-        st.caption("Schnittkriterium: Varianz - bei einem Zahlenziel gibt es keine Wahl.")
+        st.caption("Split-Kriterium: Varianz - bei einem Zahlenziel gibt es keine Wahl.")
     leaf = st.slider("Mindestgröße eines Blatts", *bounds("leaf_slider"), key="leaf_slider")
     n_trees = st.slider("Zahl der Bäume", *bounds("n_trees_slider"), key="n_trees_slider")
     n_noise = st.slider("Rauschmerkmale", *bounds("n_noise_slider"), key="n_noise_slider")
@@ -124,8 +124,8 @@ with st.sidebar:
     mtry_hi = min(bounds("mtry_slider")[1], d_now)
     if st.session_state["mtry_slider"] > mtry_hi:
         st.session_state["mtry_slider"] = mtry_hi
-    mtry = st.slider(f"mtry (Merkmale je Schnitt, von {d_now})", 1, mtry_hi, key="mtry_slider",
-                     help=f"Wie viele der {d_now} Merkmale an jedem Schnitt zur Wahl stehen - jedes bekommt genau eine zufällige Schwelle. {d_now} = alle Merkmale, aber immer noch mit Zufallsschwelle statt Suche.")
+    mtry = st.slider(f"mtry (Merkmale je Split, von {d_now})", 1, mtry_hi, key="mtry_slider",
+                     help=f"Wie viele der {d_now} Merkmale an jedem Split zur Wahl stehen - jedes bekommt genau eine zufällige Schwelle. {d_now} = alle Merkmale, aber immer noch mit Zufallsschwelle statt Suche.")
     bootstrap = st.checkbox("Bootstrap-Stichproben", key="bootstrap_check", help="Aus: jeder Baum sieht alle Trainingszeilen (Geurts' Standard, auch scikit-learns Voreinstellung). An: wie in bagging-demo/random-forest-demo - macht Out-of-Bag verfügbar.")
     if task == "class":
         label_noise = st.slider("Falsche Etiketten im Training [%]", *bounds("label_noise_slider"), key="label_noise_slider")
@@ -216,7 +216,7 @@ st.markdown("---")
 st.markdown("## 📐 Was der Wald gelernt hat – und wie gut er auf neuen Lieferungen ist")
 st.caption("Vergleichsmaßstäbe: **ein Einzelbaum** und **dieselbe Konfiguration mit erschöpfender Schwellensuche** (= Random Forest bzw. cart-demo, je nach mtry) statt Zufallsschwellen.")
 m1, m2, m3, m4 = st.columns(4)
-m1.metric("mtry / Bäume", f"{int(mtry)} / {int(n_trees)}", help=f"Merkmale je Schnitt von {n_feat} insgesamt, und Zahl der Bäume.")
+m1.metric("mtry / Bäume", f"{int(mtry)} / {int(n_trees)}", help=f"Merkmale je Split von {n_feat} insgesamt, und Zahl der Bäume.")
 m2.metric("Testfehler", _err(task, a.test["error"]), delta=f"1 Baum: {_err(task, a.single_test['error'])}", delta_color="off")
 if bootstrap:
     m3.metric("Out-of-Bag-Fehler", _err(task, a.oob["error"]), delta=f"Raten: {_err(task, a.baseline)}", delta_color="off")
@@ -279,10 +279,10 @@ st.markdown(
     """
 | Annahme | Was passiert, wenn sie verletzt ist | Wer setzt an |
 |---|---|---|
-| **Der Aufwand sinkt, die Genauigkeit auch** | Eine zufällige statt der besten Schwelle ist fast immer ein schlechterer Schnitt (Messwert oben) - Extra Trees tauscht Genauigkeit gegen Geschwindigkeit, nicht umgekehrt. Auf diesem Datensatz gewinnt Random Forest bei der reinen Vorhersagegüte. | mehr Bäume (hilft nur teilweise, siehe Experiment), größeres mtry |
-| **Mehr billige Bäume sind kein Ersatz für bessere Schnitte** | Selbst bei einem Bruchteil des Aufwands von Random Forest bleibt eine Lücke, die auch fünfmal so viele Bäume nicht schließen (gemessen oben) - die zusätzliche Varianzsenkung sättigt, der Bias bleibt. | Random Forest, wenn Genauigkeit vor Geschwindigkeit geht |
+| **Der Aufwand sinkt, die Genauigkeit auch** | Eine zufällige statt der besten Schwelle ist fast immer ein schlechterer Split (Messwert oben) - Extra Trees tauscht Genauigkeit gegen Geschwindigkeit, nicht umgekehrt. Auf diesem Datensatz gewinnt Random Forest bei der reinen Vorhersagegüte. | mehr Bäume (hilft nur teilweise, siehe Experiment), größeres mtry |
+| **Mehr billige Bäume sind kein Ersatz für bessere Splits** | Selbst bei einem Bruchteil des Aufwands von Random Forest bleibt eine Lücke, die auch fünfmal so viele Bäume nicht schließen (gemessen oben) - die zusätzliche Varianzsenkung sättigt, der Bias bleibt. | Random Forest, wenn Genauigkeit vor Geschwindigkeit geht |
 | **Ohne Bootstrap gibt es kein Out-of-Bag** | Der Standardfall (kein Bootstrap) braucht eigene Testdaten für eine ehrliche Fehlerschätzung - die eingebaute OOB-Schätzung aus bagging-demo/random-forest-demo entfällt, außer man schaltet Bootstrap zusätzlich ein. | Bootstrap-Regler |
-| **Die Zufallsschwelle ignoriert die Datenverteilung** | Gleichverteilt zwischen Minimum und Maximum trifft bei schiefen oder mehrgipfligen Merkmalen selten eine wirklich informative Stelle - die besten Schnitte liegen oft nicht in der Mitte des Wertebereichs. | erschöpfende Suche (Random Forest) für Merkmale mit bekannter Struktur |
+| **Die Zufallsschwelle ignoriert die Datenverteilung** | Gleichverteilt zwischen Minimum und Maximum trifft bei schiefen oder mehrgipfligen Merkmalen selten eine wirklich informative Stelle - die besten Splits liegen oft nicht in der Mitte des Wertebereichs. | erschöpfende Suche (Random Forest) für Merkmale mit bekannter Struktur |
 | **Randomisierung hat Grenzen** | Bei sehr wenigen informativen Merkmalen unter vielen Rauschmerkmalen trifft die zufällige Merkmalsteilmenge (mtry) oft gar kein echtes Merkmal - dasselbe Problem wie bei Random Forest, hier zusätzlich verschärft durch die zufällige Schwelle. | größeres mtry, mehr Bäume |
 """
 )
@@ -295,12 +295,12 @@ with st.expander("📐 Mathematische Formulierung"):
         r"""
 **Extra Trees.** Wie Random Forest: $B$ Bäume, an jedem Knoten $t$ eine zufällige Teilmenge $M_t\subset\{1,\dots,d\}$, $|M_t|=\texttt{mtry}$. Für jedes $j\in M_t$ wird **eine** Schwelle
 $s_j \sim \mathrm{Uniform}(\min_{i\in t} x_{ij},\, \max_{i\in t} x_{ij})$ gezogen (statt aller Kandidaten zwischen den sortierten Werten); gewählt wird $j^* = \arg\max_{j\in M_t} \Delta(j, s_j)$ mit demselben
-Gewinn $\Delta$ wie in cart-demo. Ohne Bootstrap sieht jeder Baum alle $n$ Trainingszeilen.
+Gain $\Delta$ wie in cart-demo. Ohne Bootstrap sieht jeder Baum alle $n$ Trainingszeilen.
 
 **Aufwand.** Erschöpfende Suche (cart-demo/Random Forest) prüft an einem Knoten mit $m$ Zeilen bis zu $\texttt{mtry}\times(m-1)$ Schwellen; Extra Trees prüft immer genau $\texttt{mtry}$ - unabhängig von $m$. Über einen
 ganzen Baum mit $L-1$ inneren Knoten ($L$ Blätter): $\texttt{mtry}\times(L-1)$ statt $\texttt{mtry}\times\sum_t (m_t-1)$.
 
-**Bias-Varianz.** Wie in bagging-demo/random-forest-demo, aber mit einer dritten Zufallsquelle (der Schwelle selbst): die erwartete Vorhersage $\mathbb E[\hat f]$ verschiebt sich stärker vom besten erreichbaren Schnitt weg
+**Bias-Varianz.** Wie in bagging-demo/random-forest-demo, aber mit einer dritten Zufallsquelle (der Schwelle selbst): die erwartete Vorhersage $\mathbb E[\hat f]$ verschiebt sich stärker vom besten erreichbaren Split weg
 (höherer Bias, weil $s_j$ selten die optimale Schwelle trifft), während die Streuung zwischen den Bäumen wächst - das senkt die Korrelation $\rho$ zwischen Baumpaaren und damit (siehe bagging-demo/random-forest-demo-Formel) die Varianz des Mittels zusätzlich.
 
 Implementiert in `et_tree.py` (Baumkern mit `mtry` und `random_split`), `et_algorithm.py` (Bootstrap-Regler, Mitteln, Aufwands-Zähler), `et_evaluation.py` (Analyse, Aufwands-Sweep, Bias-Varianz).

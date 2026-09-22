@@ -77,7 +77,7 @@ def test_random_split_never_beats_the_best_split_in_expected_gain_but_can_be_wor
 # --- Zähler geprüfter Paare: Formel gegen direkte Instrumentierung -----------------------------------------------------------------------------------
 
 def test_evaluated_split_count_formula_matches_a_direct_instrumentation():
-    """Zählt während des Wachsens tatsächlich, wie oft random_split für ein Kandidatenmerkmal einen Gewinn berechnet (auch wenn der Schnitt am Ende ungültig ist) - muss exakt mtry * n_splits(tree) ergeben,
+    """Zählt während des Wachsens tatsächlich, wie oft random_split für ein Kandidatenmerkmal einen Gain berechnet (auch wenn der Split am Ende ungültig ist) - muss exakt mtry * n_splits(tree) ergeben,
     solange kein Kandidat wegen eines im Knoten konstanten Merkmals übersprungen wird (bei stetigen Rauschdaten praktisch nie)."""
     X, y = _continuous(300, 5, 3, "class")
     mtry = 3
