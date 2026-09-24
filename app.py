@@ -24,6 +24,7 @@ from et_presets import (
     init_session_state_defaults,
     load_permalink_settings,
     randomize_seed,
+    seed_widget,
     sync_query_params,
 )
 from et_visualization import (
@@ -105,13 +106,14 @@ st.caption("🔗 Die Adresszeile oben spiegelt Ihre aktuelle Konfiguration wider
 
 load_permalink_settings()
 init_session_state_defaults()
-if st.session_state["criterion_select"] not in ("gini", "entropy"):
-    st.session_state["criterion_select"] = "gini"
+if st.session_state.get(KEPT["criterion_select"], "gini") not in ("gini", "entropy"):
+    st.session_state[KEPT["criterion_select"]] = "gini"
 
 with st.sidebar:
     st.header("⚙️ Einstellungen")
     task = st.selectbox("Aufgabe", C.TASKS, key="task_select", format_func=lambda k: C.TASK_LABELS[k])
     if task == "class":
+        seed_widget("criterion_select")
         crit = st.selectbox("Split-Kriterium", C.CRITERIA["class"], key="criterion_select", format_func=lambda k: C.CRITERION_LABELS[k])
         st.session_state[KEPT["criterion_select"]] = crit
     else:
@@ -128,6 +130,7 @@ with st.sidebar:
                      help=f"Wie viele der {d_now} Merkmale an jedem Split zur Wahl stehen - jedes bekommt genau eine zufällige Schwelle. {d_now} = alle Merkmale, aber immer noch mit Zufallsschwelle statt Suche.")
     bootstrap = st.checkbox("Bootstrap-Stichproben", key="bootstrap_check", help="Aus: jeder Baum sieht alle Trainingszeilen (Geurts' Standard, auch scikit-learns Voreinstellung). An: wie in bagging-demo/random-forest-demo - macht Out-of-Bag verfügbar.")
     if task == "class":
+        seed_widget("label_noise_slider")
         label_noise = st.slider("Falsche Etiketten im Training [%]", *bounds("label_noise_slider"), key="label_noise_slider")
         st.session_state[KEPT["label_noise_slider"]] = label_noise
     else:
